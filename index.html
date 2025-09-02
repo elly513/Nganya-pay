@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matatu Payment System with QR Scanner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- App Selection Screen -->
+        <div id="app-selector" class="app-selector">
+            <h1>🚐 Matatu Payment System</h1>
+            <p>Select your app to get started</p>
+            <div class="app-buttons">
+                <button class="app-btn passenger" onclick="showApp('passenger')">
+                    👤 Passenger App
+                </button>
+                <button class="app-btn conductor" onclick="showApp('conductor')">
+                    🎫 Conductor App
+                </button>
+                <button class="app-btn admin" onclick="showApp('admin')">
+                    ⚙️ Admin Panel
+                </button>
+            </div>
+        </div>
+
+        <!-- Passenger App -->
+        <div id="passenger-app" class="app-section">
+            <button class="back-btn" onclick="showSelector()">← Back</button>
+            <div class="section-header">
+                <h2>👤 Passenger Payment</h2>
+                <p>Scan QR code to pay for your ride</p>
+            </div>
+
+            <div id="passenger-main">
+                <div class="route-info">
+                    <strong>Route:</strong> Nairobi CBD - Westlands<br>
+                    <strong>Fare:</strong> KSh <span id="display-fare">50</span>
+                </div>
+
+                <div class="qr-scanner">
+                    <div class="qr-placeholder">
+                        📱 QR Code Scanner<br>
+                        <div class="scan-line"></div>
+                        Ready to scan
+                    </div>
+                    <div class="demo-note">
+                        For demo: Click "Simulate QR Scan" to test payment flow
+                    </div>
+                    <button class="btn" onclick="simulateQRScan()">Simulate QR Scan</button>
+                </div>
+
+                <div id="qr-success" style="display: none;">
+                    <div class="payment-info">
+                        <h3 style="color: #4CAF50;">✅ QR Code Scanned!</h3>
+                        <p><strong>Route:</strong> <span id="scanned-route"></span></p>
+                        <p><strong>Matatu:</strong> <span id="scanned-matatu"></span></p>
+                        <p><strong>Seat:</strong> <span id="scanned-seat"></span></p>
+                    </div>
+                    <button class="btn success" onclick="proceedToPayment()">
+                        Proceed to Payment - KSh <span id="proceed-fare">50</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="payment-process" style="display: none;">
+                <div class="payment-info">
+                    <h3>💳 M-Pesa Payment</h3>
+                    <p><strong>Amount:</strong> KSh <span id="payment-amount">50</span></p>
+                    <p><strong>Route:</strong> <span id="payment-route"></span></p>
+                    <p><strong>Seat:</strong> <span id="payment-seat"></span></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Enter M-Pesa PIN:</label>
+                    <input type="password" id="mpesa-pin" placeholder="Enter your 4-digit PIN" maxlength="4">
+                </div>
+
+                <button class="btn success" onclick="processPayment()">
+                    Confirm Payment
+                </button>
+                <button class="btn secondary" onclick="cancelPayment()">
+                    Cancel
+                </button>
+            </div>
+
+            <div id="payment-success" style="display: none;">
+                <div class="payment-info">
+                    <h3 style="color: #4CAF50;">✅ Payment Successful!</h3>
+                    <p><strong>Transaction ID:</strong> <span id="transaction-id"></span></p>
+                    <p><strong>Seat:</strong> <span id="confirmed-seat"></span></p>
+                    <p><strong>Amount:</strong> KSh <span id="confirmed-amount">50</span></p>
+                </div>
+                <button class="btn" onclick="resetPassengerApp()">New Payment</button>
+            </div>
+        </div>
+
+        <!-- Conductor App -->
+        <div id="conductor-app" class="app-section">
+            <button class="back-btn" onclick="showSelector()">← Back</button>
+            <div class="section-header">
+                <h2>🎫 Conductor Panel</h2>
+                <p>Manage passenger payments</p>
+            </div>
+
+            <div id="conductor-login">
+                <div class="form-group">
+                    <label>Conductor ID:</label>
+                    <input type="text" id="conductor-id" placeholder="Enter your ID" value="COND001">
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="conductor-password" placeholder="Enter password" value="pass123">
+                </div>
+                <button class="btn" onclick="conductorLogin()">Login</button>
+            </div>
+
+            <div id="conductor-dashboard" style="display: none;">
+                <div class="route-info">
+                    <strong>Matatu:</strong> KCA 123A<br>
+                    <strong>Route:</strong> Nairobi CBD - Westlands
+                </div>
+
+                <h3>Payment Status by Seat</h3>
+                <div class="seat-grid" id="conductor-seat-grid">
+                    <!-- Seats will be generated by JavaScript -->
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="paid-count">0</div>
+                        <div class="stat-label">Paid Seats</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-revenue">0</div>
+                        <div class="stat-label">Revenue (KSh)</div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="refreshPayments()">Refresh Payments</button>
+                <button class="btn danger" onclick="conductorLogout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Admin App -->
+        <div id="admin-app" class="app-section">
+            <button class="back-btn" onclick="showSelector()">← Back</button>
+            <div class="section-header">
+                <h2>⚙️ Admin Panel</h2>
+                <p>System management and analytics</p>
+            </div>
+
+            <div id="admin-login">
+                <div class="form-group">
+                    <label>Admin Username:</label>
+                    <input type="text" id="admin-username" placeholder="Enter username" value="admin">
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="admin-password" placeholder="Enter password" value="admin123">
+                </div>
+                <button class="btn" onclick="adminLogin()">Login</button>
+            </div>
+
+            <div id="admin-dashboard" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-transactions">0</div>
+                        <div class="stat-label">Total Transactions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="daily-revenue">0</div>
+                        <div class="stat-label">Today's Revenue</div>
+                    </div>
+                </div>
+
+                <h3>Recent Transactions</h3>
+                <div class="transaction-list" id="transaction-list">
+                    <p style="text-align: center; color: #666; padding: 20px;">No transactions yet</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Set Fare Amount (KSh):</label>
+                    <input type="number" id="fare-amount" value="50" min="10" max="500">
+                </div>
+
+                <button class="btn" onclick="updateFare()">Update Fare</button>
+                <button class="btn danger" onclick="adminLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
